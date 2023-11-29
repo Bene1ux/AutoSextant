@@ -290,7 +290,7 @@ public class AutoSextant : BaseSettingsPlugin<AutoSextantSettings>
             yield break;
         }
         var maxCompassesThisSession = Math.Min(maxCharged, capacity - totalStock);
-
+       
         var holdingShift = false;
         // TODO: attempt counter, then if too many, clear cursor and try again
         while (Inventory.TotalChargedCompasses < maxCompassesThisSession)
@@ -298,11 +298,12 @@ public class AutoSextant : BaseSettingsPlugin<AutoSextantSettings>
             yield return NStash.Stash.SelectTab(Settings.RestockSextantFrom);
             var compassPrice = stone.Price;
             var currentName = compassPrice?.Name ?? null;
-
+            
             bool capOk = true;
             int index, cap;
             string _;
-            bool never, always;
+            bool never = false, 
+                always;
             if (currentName != null)
             {
                 index = Settings.ModSettings.FindIndex(x => x.Item1 == currentName);
@@ -310,7 +311,7 @@ public class AutoSextant : BaseSettingsPlugin<AutoSextantSettings>
                 capOk = cap > 0 ? Stock.Get(CompassList.PriceToModName[currentName]) < cap : true;
             }
 
-            if (compassPrice == null || compassPrice.ChaosPrice < Settings.MinChaosValue || !capOk)
+            if (never || compassPrice == null || compassPrice.ChaosPrice < Settings.MinChaosValue || !capOk)
             {
                 var nextSextant = Stash.NextSextant;
                 if (nextSextant == null)
@@ -326,7 +327,7 @@ public class AutoSextant : BaseSettingsPlugin<AutoSextantSettings>
                 }
                 yield return Input.ClickElement(stone.Position);
                 SessionWindow.IncreaseSextantCount();
-                yield return new WaitFunctionTimed(() => stone.Price != null && stone.Price.Name != currentName, false, 50);
+                yield return new WaitFunctionTimed(() => stone.Price != null && stone.Price.Name != currentName, false, 500);
                 if (stone.Price == null || stone.Price.Name == currentName)
                 {
                     holdingShift = false;
@@ -357,14 +358,14 @@ public class AutoSextant : BaseSettingsPlugin<AutoSextantSettings>
                 {
                     yield return Input.UseItem(nextCompass.Position);
                     yield return Input.ClickElement(stone.Position);
-                    yield return new WaitFunctionTimed(() => Cursor.ItemName != null && Cursor.ItemName == "Charged Compass", false, 50);
+                    yield return new WaitFunctionTimed(() => Cursor.ItemName != null && Cursor.ItemName == "Charged Compass", false, 500);
                 }
                 SessionWindow.AddMod(compassPrice.Name);
                 var count = NInventory.Inventory.InventoryCount;
-                while (NInventory.Inventory.InventoryCount == count || (Cursor.ItemName != null && Cursor.ItemName == "Charged Compass"))
+                while (NInventory.Inventory.InventoryCount == count && (Cursor.ItemName != null && Cursor.ItemName == "Charged Compass"))
                 {
                     yield return Input.ClickElement(nextFreeSlot.Position);
-                    yield return new WaitFunctionTimed(() => NInventory.Inventory.InventoryCount != count || (Cursor.ItemName != null && Cursor.ItemName == "Charged Compass"), false, 50);
+                    yield return new WaitFunctionTimed(() => NInventory.Inventory.InventoryCount != count && (Cursor.ItemName == null), false, 500);
                 }
             }
         }
@@ -422,7 +423,7 @@ public class AutoSextant : BaseSettingsPlugin<AutoSextantSettings>
                 }
                 yield return Input.ClickElement(stone.Position);
                 SessionWindow.IncreaseSextantCount();
-                yield return new WaitFunctionTimed(() => stone.Price != null && stone.Price.Name != currentName, false, 50);
+                yield return new WaitFunctionTimed(() => stone.Price != null && stone.Price.Name != currentName, false, 500);
                 if (stone.Price == null || stone.Price.Name == currentName)
                 {
                     yield return new WaitTime(50);

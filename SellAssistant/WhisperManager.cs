@@ -279,7 +279,7 @@ public static class WhisperManager
                 ImGui.TextDisabled("(Original message)");
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.BeginTooltip();
+                    ImGui.BeginItemTooltip();//BeginTooltip();
                     ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
                     foreach (var m in whisper.Messages)
                         ImGui.TextUnformatted(m);

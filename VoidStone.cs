@@ -112,9 +112,17 @@ public class VoidStone
       var compassName = CompassList.ModNameToPrice.GetValueOrDefault(name, null);
       if (!CompassList.Prices.ContainsKey(compassName))
       {
-        Error.AddAndShow("FATAL", $"No price found for {compassName}");
-        return null;
-      }
+                
+                Log.Error($"No price found for {compassName}, will consider it as 0c");
+                return new CompassPrice
+                {
+                    Name = name,
+                    ChaosPrice = 0
+                };
+                //Error.AddAndShow("FATAL", $"No price found for {compassName}");
+                // AutoSextant.Instance.StopAllRoutines();
+                // return null;
+            }
       var compassPrice = CompassList.Prices.GetValueOrDefault(compassName, null);
       return compassPrice;
     }
